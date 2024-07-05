@@ -1,52 +1,15 @@
 import { useState } from "react"
+import confetti from "canvas-confetti"
+import { Square } from "./components/Square"
+import { find_winner } from "./logic/board"
+import { WinnerModal } from "./components/WinnerModal"
 
 const TURNS = {
-  X: "x",
-  O: "o"
+  X: "❌",
+  O: "⚪"
 }
 
-
-const Square = ({children, isSelected, updateBoard, row, col}) => {
-  const className = `square ${isSelected ? "is-selected" : "" }`
-
-  const handleClick = () => {
-    updateBoard(row, col)
-  }
-
-  return (
-    <div onClick={handleClick} className={className}>{children}</div>
-  )
-}
-
-const find_winner = (board) => {
-    const size = 3
-  
-    // Verificación de filas
-    for (let i = 0; i < size; i++) {
-      if (board[i][0] && board[i].every((cell) => cell === board[i][0])) {
-        return board[i][0]
-      }
-    }
-  
-    // Verificación de columnas
-    for (let j = 0; j < size; j++) {
-      if (board[0][j] && board.every((row) => row[j] === board[0][j])) {        
-        return board[0][j]
-      }
-    }
-  
-    // Verificación de diagonales
-    if (board[0][0] && board.every((row, i) => row[i] === board[0][0])) {
-      return board[0][0]
-    }
-    if (board[0][size - 1] && board.every((row, i) => row[size - 1 - i] === board[0][size - 1])) {
-      return board[0][size - 1]
-    }
-  
-    return null; // No hay ganador
-  
-}
-
+ 
 function App() {
   const resetGame = () => {
    setBoard(Array(3).fill(Array(3).fill(null)))
@@ -60,7 +23,11 @@ function App() {
   const [turn, setTurn] = useState(TURNS.X)
 
   const [winner, setWinner] = useState(null)
-    
+  
+  const checkEndGame = (newBoard) => {
+    return newBoard.every((square) => square.every((cell) => cell !== null))
+  }
+
   const updateBoard = (rowIndex, colIndex) => {
     if (board[rowIndex][colIndex] !== null || winner) return 
     const newBoard = board.map((row) => [...row])
@@ -71,15 +38,17 @@ function App() {
     setTurn(newTurn)
     const newWinner = find_winner(newBoard)
     if(newWinner) {
-      setWinner(() => {
-        return newWinner
-      })
+      confetti()
+      setWinner(newWinner)
+    } else if (checkEndGame(newBoard)) {
+      setWinner(false)
     }
   }
 
   return (
     <main className="board">
       <h1>Tic tac toe</h1>
+      <button onClick={resetGame}>Start Again</button>
       <section className="game">
         {
           board.map((row, rowIndex) => (
@@ -104,27 +73,7 @@ function App() {
         <Square isSelected={turn === TURNS.O}>{TURNS.O}</Square>
       </section>
 
-      {
-        winner !== null && (
-          <section className="winner">
-            <div className="text">
-              <h2>
-                {
-                  winner === false ? "Empate" : "Ganó: "
-                }
-              </h2>
-
-              <header className="win">
-                {winner && <Square>{winner}</Square>}
-              </header>
-
-              <footer>
-                <button onClick={resetGame}>Empezar de nuevo</button>
-              </footer>
-            </div>
-          </section>
-        )
-      }
+      <WinnerModal resetGame={resetGame} winner={winner} />
     </main>
   )
 }
