@@ -6,11 +6,11 @@ const TURNS = {
 }
 
 
-const Square = ({children, isSelected, updateBoard, index}) => {
+const Square = ({children, isSelected, updateBoard, row, col}) => {
   const className = `square ${isSelected ? "is-selected" : "" }`
 
   const handleClick = () => {
-    updateBoard(index)
+    updateBoard(row, col)
   }
 
   return (
@@ -18,17 +18,31 @@ const Square = ({children, isSelected, updateBoard, index}) => {
   )
 }
 
+const find_winner = (board) => {
+  let flag_x = false
+  let flag_o = false
+  for(let i = 0; i < 8; i++) {
+    if(board[i] === "null") continue
+    else if((board[i] === "x")) {
+    }
+  }
+}
+
 function App() {
   
   const [board, setBoard] = useState(
-    Array(9).fill(null)
+     Array(3).fill(Array(3).fill(null))
   )
 
   const [turn, setTurn] = useState(TURNS.X)
+
+  const [winner, setWinner] = useState(null)
     
-  const updateBoard = (index) => {
-    const newBoard = [...board]
-    newBoard[index] = turn 
+  const updateBoard = (rowIndex, colIndex) => {
+    if (board[rowIndex][colIndex] !== null) return 
+    const newBoard = board.map((row) => [...row])
+
+    newBoard[rowIndex][colIndex] = turn 
     setBoard(newBoard)
 
     const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X
@@ -40,18 +54,21 @@ function App() {
       <h1>Tic tac toe</h1>
       <section className="game">
         {
-          board.map((_, index) => {
-            return (
+          board.map((row, rowIndex) => (
+            row.map((cell, colIndex) => (
               <Square 
-                key={index} 
-                index={index} 
+                key={colIndex}
                 updateBoard={updateBoard}
-              >
-                {board[index]}
+                row={rowIndex}
+                col={colIndex}
+                >
+                {cell}
               </Square>
             )
-          })
-        }
+            )
+          )
+        )
+      }
       </section>
 
       <section className="turn">
