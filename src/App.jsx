@@ -4,6 +4,7 @@ import { find_winner } from "./logic/board"
 import { WinnerModal } from "./components/WinnerModal"
 import { TurnSection } from "./components/TurnSection"
 import { BoardSection } from "./components/BoardSection"
+import { saveGameToStorage, resetGameStorage } from "./logic/storage"
 
 export const TURNS = {
   X: "❌",
@@ -15,12 +16,17 @@ function App() {
    setBoard(Array(3).fill(Array(3).fill(null)))
    setTurn(TURNS.X)
    setWinner(null)
+   resetGameStorage()
   }
-  const [board, setBoard] = useState(
-     Array(3).fill(Array(3).fill(null))
-  )
+  const [board, setBoard] = useState(()=>{
+    const boardFrontStorage = window.localStorage.getItem("board")
+    return boardFrontStorage ? JSON.parse(boardFrontStorage) : Array(3).fill(Array(3).fill(null))
+  })
 
-  const [turn, setTurn] = useState(TURNS.X)
+  const [turn, setTurn] = useState(() => {
+    const turnFromStorage = window.localStorage.getItem("turn")
+    return turnFromStorage ?? TURNS.X
+  })
 
   const [winner, setWinner] = useState(null)
   
@@ -36,6 +42,12 @@ function App() {
     setBoard(newBoard)
     const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X
     setTurn(newTurn)
+
+    saveGameToStorage({
+      board: newBoard,
+      turn: newTurn
+    })
+    
     const newWinner = find_winner(newBoard)
     if(newWinner) {
       confetti()
