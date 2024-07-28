@@ -6,5 +6,4 @@ export const saveGameToStorage = ({board, turn}) => {
 export const resetGameStorage = () => {
   window.localStorage.removeItem("board")
   window.localStorage.removeItem("turn")
-  
 }
